@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte seu Lanche | Chama Burguer</title>
+    <style>
+        :root {
+            --marrom-escuro: #2b1a14;
+            --laranja: #f59e0b;
+            --laranja-hover: #d97706;
+            --vermelho: #e11d48;
+            --creme: #fdf6ec;
+            --creme-escuro: #f5e6d3;
+            --texto-escuro: #2b1a14;
+            --texto-muted: #7a6a60;
+            --bg-card: #ffffff;
+            --sombra: 0 4px 20px rgba(43, 26, 20, 0.1);
+            --raio: 12px;
+            --transicao: 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background-color: var(--creme);
+            color: var(--texto-escuro);
+            line-height: 1.6;
+        }
+
+        /* Header Simples */
+        .header-montagem {
+            background-color: var(--marrom-escuro);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-montagem h1 {
+            color: var(--laranja);
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .btn-voltar {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s;
+        }
+
+        .btn-voltar:hover {
+            color: var(--laranja);
+        }
+
+        /* Layout Principal */
+        .conteudo-montagem {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        @media (max-width: 900px) {
+            .conteudo-montagem {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Seções de Ingredientes */
+        .secao-ingredientes {
+            margin-bottom: 40px;
+        }
+
+        .secao-ingredientes h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            color: var(--marrom-escuro);
+            border-bottom: 2px solid var(--creme-escuro);
+            padding-bottom: 8px;
+        }
+
+        .grid-ingredientes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        /* Cards de Ingredientes */
+        .card-ingrediente {
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: var(--sombra);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: var(--transicao);
+            border: 2px solid transparent;
+        }
+
+        .card-ingrediente:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Inputs (Radio/Checkbox escondidos e estilizados) */
+        .card-ingrediente input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .card-ingrediente .custom-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .card-ingrediente input[type="checkbox"]+.custom-check {
+            border-radius: 4px;
+        }
+
+        .card-ingrediente input:checked+.custom-check {
+            background: var(--laranja);
+            border-color: var(--laranja);
+        }
+
+        .card-ingrediente input:checked+.custom-check::after {
+            content: "✓";
+            color: #fff;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .card-ingrediente.selecionado {
+            border-color: var(--laranja);
+            background: #fffbeb;
+        }
+
+        .info-ingrediente {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-ingrediente .nome {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .info-ingrediente .preco {
+            font-size: 0.85rem;
+            color: var(--texto-muted);
+        }
+
+        /* Painel Resumo (Sidebar) */
+        .painel-resumo {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--raio);
+            box-shadow: var(--sombra);
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .painel-resumo h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            color: var(--marrom-escuro);
+        }
+
+        .lista-resumo {
+            list-style: none;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .lista-resumo li {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            color: var(--texto-muted);
+        }
+
+        .lista-resumo li strong {
+            color: var(--texto-escuro);
+        }
+
+        .total-resumo {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--marrom-escuro);
+            margin-bottom: 20px;
+            border-top: 2px solid var(--creme-escuro);
+            padding-top: 16px;
+        }
+
+        .btn-adicionar {
+            width: 100%;
+            background: var(--laranja);
+            color: var(--marrom-escuro);
+            border: none;
+            padding: 16px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-adicionar:hover {
+            background: var(--laranja-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-adicionar:disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Toast Simples */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            background: var(--marrom-escuro);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: 0.4s;
+            border-left: 5px solid var(--laranja);
+        }
+
+        .toast.ativo {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header-montagem">
+        <a href="index.html" class="btn-voltar">← Voltar ao Cardápio</a>
+        <h1>Monte seu Lanche</h1>
+    </header>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <main class="conteudo-montagem">
+        <!-- Área de Seleção -->
+        <div class="area-ingredientes">
+
+            <!-- Pães (Escolha Única) -->
+            <section class="secao-ingredientes">
+                <h2>1. Escolha o Pão (Obrigatório)</h2>
+                <div class="grid-ingredientes" id="grupo-paes"></div>
+            </section>
+
+            <!-- Carnes (Escolha Única) -->
+            <section class="secao-ingredientes">
+                <h2>2. Escolha a Carne (Obrigatório)</h2>
+                <div class="grid-ingredientes" id="grupo-carnes"></div>
+            </section>
+
+            <!-- Molhos (Escolha Única) -->
+            <section class="secao-ingredientes">
+                <h2>3. Escolha o Molho (Obrigatório)</h2>
+                <div class="grid-ingredientes" id="grupo-molhos"></div>
+            </section>
+
+            <!-- Queijos (Múltipla Escolha) -->
+            <section class="secao-ingredientes">
+                <h2>4. Queijos (Opcional)</h2>
+                <div class="grid-ingredientes" id="grupo-queijos"></div>
+            </section>
+
+            <!-- Vegetais (Múltipla Escolha) -->
+            <section class="secao-ingredientes">
+                <h2>5. Vegetais (Opcional)</h2>
+                <div class="grid-ingredientes" id="grupo-vegetais"></div>
+            </section>
+
+            <!-- Bebidas (Múltipla Escolha) -->
+            <section class="secao-ingredientes">
+                <h2>6. Bebidas (Opcional)</h2>
+                <div class="grid-ingredientes" id="grupo-bebidas"></div>
+            </section>
+
+            <!-- Adicionais (Múltipla Escolha) -->
+            <section class="secao-ingredientes">
+                <h2>7. Adicionais (Opcional)</h2>
+                <div class="grid-ingredientes" id="grupo-adicionais"></div>
+            </section>
+
+        </div>
+
+        <!-- Painel Resumo -->
+        <aside class="painel-resumo">
+            <h2>Seu Lanche</h2>
+            <ul class="lista-resumo" id="listaResumo">
+                <li style="justify-content: center; color: #999; font-style: italic;">Selecione os itens ao lado</li>
+            </ul>
+            <div class="total-resumo">
+                <span>Total:</span>
+                <span id="valorTotal">R$ 0,00</span>
+            </div>
+            <button class="btn-adicionar" id="btnAdicionar" disabled>Adicionar ao Carrinho</button>
+        </aside>
+    </main>
+
+    <script>
+        // ============================================
+        // "BANCO DE DADOS" DE INGREDIENTES
+        // ============================================
+        const ingredientes = {
+            paes: [
+                { id: 'brioche', nome: 'Pão Brioche', preco: 5.00 },
+                { id: 'australiano', nome: 'Pão Australiano', preco: 6.50 }
+            ],
+            carnes: [
+                { id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00 },
+                { id: 'frango', nome: 'Frango Grelhado', preco: 12.00 },
+                { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00 }
+            ],
+            molhos: [
+                { id: 'maionese', nome: 'Maionese da Casa', preco: 2.00 },
+                { id: 'barbecue', nome: 'Barbecue', preco: 2.50 },
+                { id: 'picante', nome: 'Picante', preco: 2.50 }
+            ],
+            queijos: [
+                { id: 'cheddar', nome: 'Cheddar', preco: 3.50 },
+                { id: 'prato', nome: 'Prato', preco: 3.00 }
+            ],
+            vegetais: [
+                { id: 'alface', nome: 'Alface', preco: 1.00 },
+                { id: 'tomate', nome: 'Tomate', preco: 1.50 },
+                { id: 'picles', nome: 'Picles', preco: 2.00 },
+                { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50 }
+            ],
+            bebidas: [
+                { id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00 },
+                { id: 'suco', nome: 'Suco de Laranja', preco: 8.00 },
+                { id: 'agua', nome: 'Água Mineral', preco: 4.00 }
+            ],
+            adicionais: [
+                { id: 'bacon', nome: 'Bacon', preco: 5.00 },
+                { id: 'ovo', nome: 'Ovo Frito', preco: 2.50 },
+                { id: 'onion', nome: 'Onion Rings', preco: 4.00 }
+            ]
+        };
+
+        // Estado da Montagem
+        let montagem = {
+            paes: null, // Apenas 1
+            carnes: null, // Apenas 1
+            molhos: null, // Apenas 1
+            queijos: [], // Vários
+            vegetais: [],
+            bebidas: [],
+            adicionais: []
+        };
+
+        // Elementos do DOM
+        const listaResumo = document.getElementById('listaResumo');
+        const valorTotalEl = document.getElementById('valorTotal');
+        const btnAdicionar = document.getElementById('btnAdicionar');
+        const toastContainer = document.getElementById('toastContainer');
+
+        // Função para formatar R$
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // Função para renderizar os cards de ingredientes
+        function renderizarGrupo(categoria, containerId, tipoInput) {
+            const container = document.getElementById(containerId);
+            ingredientes[categoria].forEach(item => {
+                const label = document.createElement('label');
+                label.className = 'card-ingrediente';
+                label.innerHTML = `
+                    <input type="${tipoInput}" name="${categoria}" value="${item.id}" data-preco="${item.preco}" data-nome="${item.nome}">
+                    <div class="custom-check"></div>
+                    <div class="info-ingrediente">
+                        <span class="nome">${item.nome}</span>
+                        <span class="preco">+ ${formatarMoeda(item.preco)}</span>
+                    </div>
+                `;
+                container.appendChild(label);
+
+                // Adiciona evento de mudança (change) para atualizar o resumo
+                const input = label.querySelector('input');
+                input.addEventListener('change', (e) => {
+                    if (tipoInput === 'radio') {
+                        montagem[categoria] = {
+                            nome: e.target.dataset.nome,
+                            preco: parseFloat(e.target.dataset.preco)
+                        };
+                        // Remove a classe 'selecionado' de todos os irmãos
+                        container.querySelectorAll('.card-ingrediente').forEach(c => c.classList.remove('selecionado'));
+                        label.classList.add('selecionado');
+                    } else {
+                        // Checkbox
+                        if (e.target.checked) {
+                            montagem[categoria].push({
+                                nome: e.target.dataset.nome,
+                                preco: parseFloat(e.target.dataset.preco)
+                            });
+                            label.classList.add('selecionado');
+                        } else {
+                            montagem[categoria] = montagem[categoria].filter(item => item.nome !== e.target.dataset.nome);
+                            label.classList.remove('selecionado');
+                        }
+                    }
+                    atualizarResumo();
+                });
+            });
+        }
+
+        // Renderiza todos os grupos
+        renderizarGrupo('paes', 'grupo-paes', 'radio');
+        renderizarGrupo('carnes', 'grupo-carnes', 'radio');
+        renderizarGrupo('molhos', 'grupo-molhos', 'radio');
+        renderizarGrupo('queijos', 'grupo-queijos', 'checkbox');
+        renderizarGrupo('vegetais', 'grupo-vegetais', 'checkbox');
+        renderizarGrupo('bebidas', 'grupo-bebidas', 'checkbox');
+        renderizarGrupo('adicionais', 'grupo-adicionais', 'checkbox');
+
+        // Função para atualizar o painel de resumo e o total
+        function atualizarResumo() {
+            listaResumo.innerHTML = '';
+            let total = 0;
+            let itensSelecionados = [];
+
+            // Itera sobre o objeto montagem
+            for (const categoria in montagem) {
+                if (Array.isArray(montagem[categoria])) {
+                    montagem[categoria].forEach(item => {
+                        total += item.preco;
+                        itensSelecionados.push(item.nome);
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>${item.nome}</span> <span>${formatarMoeda(item.preco)}</span>`;
+                        listaResumo.appendChild(li);
+                    });
+                } else if (montagem[categoria]) {
+                    total += montagem[categoria].preco;
+                    itensSelecionados.push(montagem[categoria].nome);
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${montagem[categoria].nome}</span> <span>${formatarMoeda(montagem[categoria].preco)}</span>`;
+                    listaResumo.appendChild(li);
+                }
+            }
+
+            // Se não houver itens, mostra mensagem padrão
+            if (itensSelecionados.length === 0) {
+                listaResumo.innerHTML = '<li style="justify-content: center; color: #999; font-style: italic;">Selecione os itens ao lado</li>';
+            }
+
+            // Atualiza o valor total
+            valorTotalEl.textContent = formatarMoeda(total);
+
+            // Habilita o botão apenas se Pão, Carne e Molho estiverem selecionados (Obrigatórios)
+            if (montagem.paes && montagem.carnes && montagem.molhos) {
+                btnAdicionar.disabled = false;
+            } else {
+                btnAdicionar.disabled = true;
+            }
+        }
+
+        // Função de Toast
+        function mostrarToast(mensagem) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span>✅</span> <span>${mensagem}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.classList.add('ativo'), 10);
+            setTimeout(() => {
+                toast.classList.remove('ativo');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // Evento do botão Adicionar
+        btnAdicionar.addEventListener('click', () => {
+            // Validação básica (já feita pelo disabled, mas é bom garantir)
+            if (!montagem.paes || !montagem.carnes || !montagem.molhos) {
+                return;
+            }
+
+            // Junta todos os nomes em uma string amigável
+            let nomes = [];
+            for (const categoria in montagem) {
+                if (Array.isArray(montagem[categoria])) {
+                    montagem[categoria].forEach(item => nomes.push(item.nome));
+                } else if (montagem[categoria]) {
+                    nomes.push(montagem[categoria].nome);
+                }
+            }
+
+            // Calcula o preço total novamente
+            let precoTotal = 0;
+            for (const categoria in montagem) {
+                if (Array.isArray(montagem[categoria])) {
+                    montagem[categoria].forEach(item => precoTotal += item.preco);
+                } else if (montagem[categoria]) {
+                    precoTotal += montagem[categoria].preco;
+                }
+            }
+
+            // Cria o objeto do item
+            const itemCustomizado = {
+                nome: `Personalizado (${nomes.join(', ')})`,
+                preco: precoTotal,
+                quantidade: 1
+            };
+
+            // Recupera o carrinho atual do localStorage
+            let carrinho = JSON.parse(localStorage.getItem('chamaBurguer_carrinho')) || [];
+
+            // Verifica se já existe um lanche exatamente igual (para somar quantidade)
+            const itemExistenteIndex = carrinho.findIndex(item => item.nome === itemCustomizado.nome);
+
+            if (itemExistenteIndex > -1) {
+                carrinho[itemExistenteIndex].quantidade += 1;
+            } else {
+                carrinho.push(itemCustomizado);
+            }
+
+            // Salva no localStorage
+            localStorage.setItem('chamaBurguer_carrinho', JSON.stringify(carrinho));
+
+            // Feedback visual
+            mostrarToast('Lanche adicionado ao carrinho!');
+
+            // Opcional: Desmarcar tudo após adicionar
+            // setTimeout(() => { location.reload(); }, 1500); 
+        });
+    </script>
+</body>
+
+</html>
