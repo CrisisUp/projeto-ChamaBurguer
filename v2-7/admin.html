@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Chama Burguer</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --texto: #fdf6ec;
+            --muted: #a0a0a0;
+            --laranja: #f59e0b;
+            --laranja-hover: #d97706;
+            --verde: #10b981;
+            --vermelho: #e11d48;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--texto);
+            padding: 24px;
+        }
+
+        .header-admin {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto 32px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 16px;
+        }
+
+        .header-admin h1 {
+            color: var(--laranja);
+            font-size: 1.5rem;
+        }
+
+        .btn-voltar {
+            color: var(--texto);
+            text-decoration: none;
+            background: #333;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .btn-voltar:hover {
+            background: var(--laranja);
+            color: #000;
+        }
+
+        .container-admin {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .categoria-admin {
+            margin-bottom: 32px;
+        }
+
+        .categoria-admin h2 {
+            font-size: 1.2rem;
+            color: var(--laranja);
+            margin-bottom: 16px;
+            text-transform: capitalize;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+
+        .linha-ingrediente {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 16px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .linha-ingrediente:last-child {
+            border-bottom: none;
+        }
+
+        .linha-ingrediente span {
+            font-weight: 500;
+        }
+
+        .input-preco {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .input-preco:focus {
+            border-color: var(--laranja);
+        }
+
+        .acoes-admin {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #333;
+        }
+
+        .btn-salvar {
+            background: var(--verde);
+            color: #fff;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-salvar:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-resetar {
+            background: transparent;
+            color: var(--vermelho);
+            border: 1px solid var(--vermelho);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-resetar:hover {
+            background: var(--vermelho);
+            color: #fff;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--verde);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: 0.4s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .toast.ativo {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header-admin">
+        <h1>⚙️ Painel de Preços - Chama Burguer</h1>
+        <a href="index.html" class="btn-voltar">Voltar à Loja</a>
+    </header>
+
+    <main class="container-admin" id="containerAdmin">
+        <!-- O conteúdo será gerado via JS -->
+    </main>
+
+    <div class="acoes-admin">
+        <button class="btn-resetar" id="btnResetar">Restaurar Padrões</button>
+        <button class="btn-salvar" id="btnSalvar">Salvar Alterações</button>
+    </div>
+
+    <div class="toast" id="toast">✅ Preços salvos com sucesso!</div>
+
+    <script>
+        // ============================================
+        // PROTEÇÃO DE ACESSO (VERIFICAÇÃO DE LOGIN)
+        // ============================================
+        if (sessionStorage.getItem('adminAutenticado') !== 'true') {
+            window.location.href = 'login.html';
+        }
+
+        // Banco de dados original (fallback)
+        const ingredientesOriginais = {
+            paes: [{ id: 'brioche', nome: 'Pão Brioche', preco: 5.00 }, { id: 'australiano', nome: 'Pão Australiano', preco: 6.50 }],
+            carnes: [{ id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00 }, { id: 'frango', nome: 'Frango Grelhado', preco: 12.00 }, { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00 }],
+            molhos: [{ id: 'maionese', nome: 'Maionese da Casa', preco: 2.00 }, { id: 'barbecue', nome: 'Barbecue', preco: 2.50 }, { id: 'picante', nome: 'Picante', preco: 2.50 }],
+            queijos: [{ id: 'cheddar', nome: 'Cheddar', preco: 3.50 }, { id: 'prato', nome: 'Prato', preco: 3.00 }],
+            vegetais: [{ id: 'alface', nome: 'Alface', preco: 1.00 }, { id: 'tomate', nome: 'Tomate', preco: 1.50 }, { id: 'picles', nome: 'Picles', preco: 2.00 }, { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50 }],
+            bebidas: [{ id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00 }, { id: 'suco', nome: 'Suco de Laranja', preco: 8.00 }, { id: 'agua', nome: 'Água Mineral', preco: 4.00 }],
+            adicionais: [{ id: 'bacon', nome: 'Bacon', preco: 5.00 }, { id: 'ovo', nome: 'Ovo Frito', preco: 2.50 }, { id: 'onion', nome: 'Onion Rings', preco: 4.00 }]
+        };
+
+        // Carrega os preços salvos ou os originais
+        let dadosAtuais = JSON.parse(localStorage.getItem('chamaBurguer_precos')) || JSON.parse(JSON.stringify(ingredientesOriginais));
+
+        const containerAdmin = document.getElementById('containerAdmin');
+
+        // Renderiza a interface
+        function renderizarAdmin() {
+            containerAdmin.innerHTML = '';
+            for (const categoria in dadosAtuais) {
+                const divCategoria = document.createElement('div');
+                divCategoria.className = 'categoria-admin';
+                divCategoria.innerHTML = `<h2>${categoria}</h2>`;
+
+                dadosAtuais[categoria].forEach((item, index) => {
+                    const linha = document.createElement('div');
+                    linha.className = 'linha-ingrediente';
+                    linha.innerHTML = `
+                        <span>${item.nome}</span>
+                        <input type="number" step="0.01" class="input-preco" data-categoria="${categoria}" data-index="${index}" value="${item.preco.toFixed(2)}">
+                    `;
+                    divCategoria.appendChild(linha);
+                });
+                containerAdmin.appendChild(divCategoria);
+            }
+        }
+
+        // Evento de salvar
+        document.getElementById('btnSalvar').addEventListener('click', () => {
+            const inputs = document.querySelectorAll('.input-preco');
+
+            inputs.forEach(input => {
+                const cat = input.dataset.categoria;
+                const index = input.dataset.index;
+                const novoPreco = parseFloat(input.value) || 0;
+                dadosAtuais[cat][index].preco = novoPreco;
+            });
+
+            localStorage.setItem('chamaBurguer_precos', JSON.stringify(dadosAtuais));
+
+            // Mostra o Toast
+            const toast = document.getElementById('toast');
+            toast.classList.add('ativo');
+            setTimeout(() => toast.classList.remove('ativo'), 3000);
+        });
+
+        // Evento de resetar
+        document.getElementById('btnResetar').addEventListener('click', () => {
+            if (confirm("Tem certeza que deseja restaurar os preços originais?")) {
+                localStorage.removeItem('chamaBurguer_precos');
+                dadosAtuais = JSON.parse(JSON.stringify(ingredientesOriginais));
+                renderizarAdmin();
+                alert("Preços restaurados!");
+            }
+        });
+
+        // Inicializa
+        renderizarAdmin();
+    </script>
+</body>
+
+</html>

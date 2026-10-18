@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito | Chama Burguer</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --laranja: #f59e0b;
+            --texto: #fff;
+            --vermelho: #e11d48;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--texto);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            color: var(--laranja);
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+        }
+
+        .login-card p {
+            color: #aaa;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+
+        .input-grupo {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-grupo label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .input-grupo input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-grupo input:focus {
+            border-color: var(--laranja);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: var(--laranja);
+            color: #000;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .erro {
+            color: var(--vermelho);
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .voltar-loja {
+            display: block;
+            margin-top: 24px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+
+        .voltar-loja:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <h1>🔒 Acesso Restrito</h1>
+        <p>Área exclusiva para administradores.</p>
+
+        <form id="formLogin">
+            <div class="input-grupo">
+                <label for="senha">Senha de Administrador</label>
+                <input type="password" id="senha" placeholder="Digite a senha..." required>
+            </div>
+            <button type="submit" class="btn-login">Entrar no Painel</button>
+            <p class="erro" id="mensagemErro">Senha incorreta. Tente novamente.</p>
+        </form>
+
+        <a href="index.html" class="voltar-loja">← Voltar para a Loja</a>
+    </div>
+
+    <script>
+        // Senha definida no código (para um sistema real, usaríamos backend)
+        const SENHA_CORRETA = "chama2026";
+
+        document.getElementById('formLogin').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const senhaDigitada = document.getElementById('senha').value;
+            const mensagemErro = document.getElementById('mensagemErro');
+
+            if (senhaDigitada === SENHA_CORRETA) {
+                // Cria uma sessão no navegador para o admin
+                sessionStorage.setItem('adminAutenticado', 'true');
+                window.location.href = 'admin.html'; // Redireciona para o painel
+            } else {
+                mensagemErro.style.display = 'block';
+                document.getElementById('senha').value = '';
+            }
+        });
+    </script>
+</body>
+
+</html>
