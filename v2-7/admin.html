@@ -215,7 +215,22 @@
         };
 
         // Carrega os preços salvos ou os originais
-        let dadosAtuais = JSON.parse(localStorage.getItem('chamaBurguer_precos')) || JSON.parse(JSON.stringify(ingredientesOriginais));
+        // Carrega os preços salvos ou os originais
+        let dadosSalvos = JSON.parse(localStorage.getItem('chamaBurguer_precos'));
+        let dadosAtuais = JSON.parse(JSON.stringify(ingredientesOriginais)); // Começa com a base completa (com imagens)
+
+        // Se houver preços salvos, atualiza apenas os preços, mantendo as imagens intactas
+        if (dadosSalvos) {
+            for (const categoria in dadosSalvos) {
+                if (dadosAtuais[categoria]) {
+                    dadosSalvos[categoria].forEach((itemSalvo, index) => {
+                        if (dadosAtuais[categoria][index]) {
+                            dadosAtuais[categoria][index].preco = itemSalvo.preco;
+                        }
+                    });
+                }
+            }
+        }
 
         const containerAdmin = document.getElementById('containerAdmin');
 

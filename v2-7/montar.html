@@ -99,14 +99,14 @@
 
         .grid-ingredientes {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 16px;
         }
 
         /* Cards de Ingredientes */
         .card-ingrediente {
             background: var(--bg-card);
-            padding: 16px;
+            padding: 12px;
             border-radius: 8px;
             box-shadow: var(--sombra);
             display: flex;
@@ -162,6 +162,23 @@
             background: #fffbeb;
         }
 
+        /* NOVO: Imagem do Ingrediente */
+        .img-ingrediente {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid var(--creme-escuro);
+            background-color: var(--creme);
+            transition: 0.2s;
+        }
+
+        .card-ingrediente.selecionado .img-ingrediente {
+            border-color: var(--laranja);
+            transform: scale(1.05);
+        }
+
         .info-ingrediente {
             display: flex;
             flex-direction: column;
@@ -175,23 +192,6 @@
         .info-ingrediente .preco {
             font-size: 0.85rem;
             color: var(--texto-muted);
-        }
-
-        /* Imagem do Ingrediente dentro do Card */
-        .img-ingrediente {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-            border: 2px solid var(--creme-escuro);
-            background-color: var(--creme);
-        }
-
-        .card-ingrediente.selecionado .img-ingrediente {
-            border-color: var(--laranja);
-            transform: scale(1.05);
-            transition: 0.2s;
         }
 
         /* Painel Resumo (Sidebar) */
@@ -358,7 +358,7 @@
 
     <script>
         // ============================================
-        // 1. BANCO DE DADOS (Com fallback para o Admin)
+        // 1. BANCO DE DADOS (Com imagens e fallback)
         // ============================================
         const ingredientesOriginais = {
             paes: [
@@ -367,33 +367,33 @@
             ],
             carnes: [
                 { id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00, img: 'assets/images/carne-bovina.jpg' },
-                { id: 'frango', nome: 'Frango Grelhado', preco: 12.00, img: 'assets/images/frango.jpg' },
-                { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00, img: 'assets/images/burger-veggie.jpg' }
+                { id: 'frango', nome: 'Frango Grelhado', preco: 12.00, img: 'assets/images/frango-grelhado.jpg' },
+                { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00, img: 'assets/images/hamburguer-grao-de-bico.jpeg' }
             ],
             molhos: [
-                { id: 'maionese', nome: 'Maionese da Casa', preco: 2.00, img: 'assets/images/maionese.jpg' },
-                { id: 'barbecue', nome: 'Barbecue', preco: 2.50, img: 'assets/images/barbecue.jpg' },
-                { id: 'picante', nome: 'Picante', preco: 2.50, img: 'assets/images/picante.jpg' }
+                { id: 'maionese', nome: 'Maionese da Casa', preco: 2.00, img: 'assets/images/maionese.jpeg' },
+                { id: 'barbecue', nome: 'Barbecue', preco: 2.50, img: 'assets/images/molho-barbecue.jpeg' },
+                { id: 'picante', nome: 'Picante', preco: 2.50, img: 'assets/images/molho-picante.jpeg' }
             ],
             queijos: [
-                { id: 'cheddar', nome: 'Cheddar', preco: 3.50, img: 'assets/images/cheddar.jpg' },
-                { id: 'prato', nome: 'Prato', preco: 3.00, img: 'assets/images/prato.jpg' }
+                { id: 'cheddar', nome: 'Cheddar', preco: 3.50, img: 'assets/images/queijo-cheddar.jpeg' },
+                { id: 'prato', nome: 'Prato', preco: 3.00, img: 'assets/images/queijo-prato.jpeg' }
             ],
             vegetais: [
                 { id: 'alface', nome: 'Alface', preco: 1.00, img: 'assets/images/alface.jpg' },
                 { id: 'tomate', nome: 'Tomate', preco: 1.50, img: 'assets/images/tomate.jpg' },
-                { id: 'picles', nome: 'Picles', preco: 2.00, img: 'assets/images/picles.jpg' },
-                { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50, img: 'assets/images/cebola.jpg' }
+                { id: 'picles', nome: 'Picles', preco: 2.00, img: 'assets/images/picles.jpeg' },
+                { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50, img: 'assets/images/cebola-roxa.jpeg' }
             ],
             bebidas: [
                 { id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00, img: 'assets/images/bebida.jpg' },
-                { id: 'suco', nome: 'Suco de Laranja', preco: 8.00, img: 'assets/images/suco.jpg' },
-                { id: 'agua', nome: 'Água Mineral', preco: 4.00, img: 'assets/images/agua.jpg' }
+                { id: 'suco', nome: 'Suco de Laranja', preco: 8.00, img: 'assets/images/suco-laranja.jpeg' },
+                { id: 'agua', nome: 'Água Mineral', preco: 4.00, img: 'assets/images/agua-mineral.jpeg' }
             ],
             adicionais: [
-                { id: 'bacon', nome: 'Bacon', preco: 5.00, img: 'assets/images/burger-bacon.jpg' },
-                { id: 'ovo', nome: 'Ovo Frito', preco: 2.50, img: 'assets/images/ovo.jpg' },
-                { id: 'onion', nome: 'Onion Rings', preco: 4.00, img: 'assets/images/onion.jpg' }
+                { id: 'bacon', nome: 'Bacon', preco: 5.00, img: 'assets/images/bacon-frito.jpeg' },
+                { id: 'ovo', nome: 'Ovo Frito', preco: 2.50, img: 'assets/images/ovo-frito.jpeg' },
+                { id: 'onion', nome: 'Onion Rings', preco: 4.00, img: 'assets/images/onions-ring.jpeg' }
             ]
         };
 
@@ -415,10 +415,13 @@
             return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // Renderiza os grupos
+        // SVG base64 como fallback quando a imagem não existir
+        const FALLBACK_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><rect width='48' height='48' rx='24' fill='%23f0e6d3'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='20' fill='%237a6a60'>?</text></svg>";
+
+        // Renderiza os grupos com imagem
         function renderizarGrupo(categoria, containerId, tipoInput) {
             const container = document.getElementById(containerId);
-            if (!ingredientes[categoria]) return; // Segurança
+            if (!ingredientes[categoria]) return;
 
             ingredientes[categoria].forEach(item => {
                 const label = document.createElement('label');
@@ -426,7 +429,7 @@
                 label.innerHTML = `
                     <input type="${tipoInput}" name="${categoria}" value="${item.id}" data-preco="${item.preco}" data-nome="${item.nome}">
                     <div class="custom-check"></div>
-                    <img src="${item.img}" alt="${item.nome}" class="img-ingrediente" onerror="this.style.display='none'">
+                    <img src="${item.img}" alt="${item.nome}" class="img-ingrediente" onerror="this.src='${FALLBACK_IMG}'">
                     <div class="info-ingrediente">
                         <span class="nome">${item.nome}</span>
                         <span class="preco">+ ${formatarMoeda(item.preco)}</span>
@@ -506,7 +509,7 @@
             if (!montagem.paes || !montagem.carnes || !montagem.molhos) return;
 
             let nomes = [];
-            let detalhesFicha = {}; // NOVO: Para a Ficha Técnica
+            let detalhesFicha = {};
 
             for (const categoria in montagem) {
                 if (Array.isArray(montagem[categoria])) {
@@ -527,12 +530,11 @@
                 else if (montagem[cat]) precoTotal += montagem[cat].preco;
             }
 
-            // Cria o objeto com os detalhes da ficha
             const itemCustomizado = {
                 nome: `Personalizado (${nomes.join(', ')})`,
                 preco: precoTotal,
                 quantidade: 1,
-                ficha: detalhesFicha // Salvamos os detalhes aqui
+                ficha: detalhesFicha
             };
 
             let carrinho = JSON.parse(localStorage.getItem('chamaBurguer_carrinho')) || [];
