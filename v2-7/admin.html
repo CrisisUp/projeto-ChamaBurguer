@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Chama Burguer</title>
+    <title>Painel de Preços | Chama Burguer</title>
     <style>
         :root {
             --bg: #121212;
@@ -67,6 +67,33 @@
             padding: 32px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .abas-admin {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .btn-aba {
+            background: transparent;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-aba:hover {
+            border-color: var(--laranja);
+        }
+
+        .btn-aba.ativo {
+            background: var(--laranja);
+            color: #000;
+            border-color: var(--laranja);
         }
 
         .categoria-admin {
@@ -140,22 +167,6 @@
             transform: translateY(-2px);
         }
 
-        .btn-resetar {
-            background: transparent;
-            color: var(--vermelho);
-            border: 1px solid var(--vermelho);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-resetar:hover {
-            background: var(--vermelho);
-            color: #fff;
-        }
-
         .toast {
             position: fixed;
             bottom: 24px;
@@ -169,6 +180,7 @@
             opacity: 0;
             transition: 0.4s;
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            z-index: 1000;
         }
 
         .toast.ativo {
@@ -180,111 +192,126 @@
 
 <body>
     <header class="header-admin">
-        <h1>⚙️ Painel de Preços - Chama Burguer</h1>
+        <h1>⚙️ Painel de Preços</h1>
         <a href="index.html" class="btn-voltar">Voltar à Loja</a>
     </header>
 
-    <main class="container-admin" id="containerAdmin">
-        <!-- O conteúdo será gerado via JS -->
+    <main class="container-admin">
+        <div class="abas-admin">
+            <button class="btn-aba ativo" id="btnTabIngredientes">Ingredientes</button>
+            <button class="btn-aba" id="btnTabProdutos">Lanches Prontos</button>
+        </div>
+        <div id="containerAdmin"></div>
     </main>
 
     <div class="acoes-admin">
-        <button class="btn-resetar" id="btnResetar">Restaurar Padrões</button>
         <button class="btn-salvar" id="btnSalvar">Salvar Alterações</button>
     </div>
 
     <div class="toast" id="toast">✅ Preços salvos com sucesso!</div>
 
     <script>
-        // ============================================
-        // PROTEÇÃO DE ACESSO (VERIFICAÇÃO DE LOGIN)
-        // ============================================
+        // PROTEÇÃO DE ACESSO
         if (sessionStorage.getItem('adminAutenticado') !== 'true') {
             window.location.href = 'login.html';
         }
 
-        // Banco de dados original (fallback)
         const ingredientesOriginais = {
-            paes: [{ id: 'brioche', nome: 'Pão Brioche', preco: 5.00 }, { id: 'australiano', nome: 'Pão Australiano', preco: 6.50 }],
-            carnes: [{ id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00 }, { id: 'frango', nome: 'Frango Grelhado', preco: 12.00 }, { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00 }],
-            molhos: [{ id: 'maionese', nome: 'Maionese da Casa', preco: 2.00 }, { id: 'barbecue', nome: 'Barbecue', preco: 2.50 }, { id: 'picante', nome: 'Picante', preco: 2.50 }],
-            queijos: [{ id: 'cheddar', nome: 'Cheddar', preco: 3.50 }, { id: 'prato', nome: 'Prato', preco: 3.00 }],
-            vegetais: [{ id: 'alface', nome: 'Alface', preco: 1.00 }, { id: 'tomate', nome: 'Tomate', preco: 1.50 }, { id: 'picles', nome: 'Picles', preco: 2.00 }, { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50 }],
-            bebidas: [{ id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00 }, { id: 'suco', nome: 'Suco de Laranja', preco: 8.00 }, { id: 'agua', nome: 'Água Mineral', preco: 4.00 }],
-            adicionais: [{ id: 'bacon', nome: 'Bacon', preco: 5.00 }, { id: 'ovo', nome: 'Ovo Frito', preco: 2.50 }, { id: 'onion', nome: 'Onion Rings', preco: 4.00 }]
+            paes: [{ id: 'brioche', nome: 'Pão Brioche', preco: 5.00, img: 'assets/images/pao-brioche.jpg' }, { id: 'australiano', nome: 'Pão Australiano', preco: 6.50, img: 'assets/images/pao-australiano.jpg' }],
+            carnes: [{ id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00, img: 'assets/images/carne-bovina.jpg' }, { id: 'frango', nome: 'Frango Grelhado', preco: 12.00, img: 'assets/images/frango.jpg' }, { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00, img: 'assets/images/burger-veggie.jpg' }],
+            molhos: [{ id: 'maionese', nome: 'Maionese da Casa', preco: 2.00, img: 'assets/images/maionese.jpg' }, { id: 'barbecue', nome: 'Barbecue', preco: 2.50, img: 'assets/images/barbecue.jpg' }, { id: 'picante', nome: 'Picante', preco: 2.50, img: 'assets/images/picante.jpg' }],
+            queijos: [{ id: 'cheddar', nome: 'Cheddar', preco: 3.50, img: 'assets/images/cheddar.jpg' }, { id: 'prato', nome: 'Prato', preco: 3.00, img: 'assets/images/prato.jpg' }],
+            vegetais: [{ id: 'alface', nome: 'Alface', preco: 1.00, img: 'assets/images/alface.jpg' }, { id: 'tomate', nome: 'Tomate', preco: 1.50, img: 'assets/images/tomate.jpg' }, { id: 'picles', nome: 'Picles', preco: 2.00, img: 'assets/images/picles.jpg' }, { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50, img: 'assets/images/cebola.jpg' }],
+            bebidas: [{ id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00, img: 'assets/images/bebida.jpg' }, { id: 'suco', nome: 'Suco de Laranja', preco: 8.00, img: 'assets/images/suco.jpg' }, { id: 'agua', nome: 'Água Mineral', preco: 4.00, img: 'assets/images/agua.jpg' }],
+            adicionais: [{ id: 'bacon', nome: 'Bacon', preco: 5.00, img: 'assets/images/burger-bacon.jpg' }, { id: 'ovo', nome: 'Ovo Frito', preco: 2.50, img: 'assets/images/ovo.jpg' }, { id: 'onion', nome: 'Onion Rings', preco: 4.00, img: 'assets/images/onion.jpg' }]
         };
 
-        // Carrega os preços salvos ou os originais
-        // Carrega os preços salvos ou os originais
-        let dadosSalvos = JSON.parse(localStorage.getItem('chamaBurguer_precos'));
-        let dadosAtuais = JSON.parse(JSON.stringify(ingredientesOriginais)); // Começa com a base completa (com imagens)
+        const produtosOriginais = [
+            { id: 'classico', nome: 'Clássico', preco: 24.90 },
+            { id: 'bacon', nome: 'Bacon', preco: 28.90 },
+            { id: 'veggie', nome: 'Veggie', preco: 26.90 },
+            { id: 'combo', nome: 'Combo Fritas + Refri', preco: 12.90 }
+        ];
 
-        // Se houver preços salvos, atualiza apenas os preços, mantendo as imagens intactas
+        let dadosSalvos = JSON.parse(localStorage.getItem('chamaBurguer_precos'));
+        let dadosIngredientes = JSON.parse(JSON.stringify(ingredientesOriginais));
         if (dadosSalvos) {
             for (const categoria in dadosSalvos) {
-                if (dadosAtuais[categoria]) {
+                if (dadosIngredientes[categoria]) {
                     dadosSalvos[categoria].forEach((itemSalvo, index) => {
-                        if (dadosAtuais[categoria][index]) {
-                            dadosAtuais[categoria][index].preco = itemSalvo.preco;
-                        }
+                        if (dadosIngredientes[categoria][index]) dadosIngredientes[categoria][index].preco = itemSalvo.preco;
                     });
                 }
             }
         }
 
+        let dadosProdutos = JSON.parse(localStorage.getItem('chamaBurguer_produtos')) || JSON.parse(JSON.stringify(produtosOriginais));
         const containerAdmin = document.getElementById('containerAdmin');
+        let abaAtual = 'ingredientes';
 
-        // Renderiza a interface
         function renderizarAdmin() {
             containerAdmin.innerHTML = '';
-            for (const categoria in dadosAtuais) {
+            if (abaAtual === 'ingredientes') {
+                for (const categoria in dadosIngredientes) {
+                    const divCategoria = document.createElement('div');
+                    divCategoria.className = 'categoria-admin';
+                    divCategoria.innerHTML = `<h2>${categoria}</h2>`;
+                    dadosIngredientes[categoria].forEach((item, index) => {
+                        const linha = document.createElement('div');
+                        linha.className = 'linha-ingrediente';
+                        linha.innerHTML = `<span>${item.nome}</span><input type="number" step="0.01" class="input-preco" data-tipo="ingrediente" data-categoria="${categoria}" data-index="${index}" value="${item.preco.toFixed(2)}">`;
+                        divCategoria.appendChild(linha);
+                    });
+                    containerAdmin.appendChild(divCategoria);
+                }
+            } else {
                 const divCategoria = document.createElement('div');
                 divCategoria.className = 'categoria-admin';
-                divCategoria.innerHTML = `<h2>${categoria}</h2>`;
-
-                dadosAtuais[categoria].forEach((item, index) => {
+                divCategoria.innerHTML = `<h2>Lanches Prontos</h2>`;
+                dadosProdutos.forEach((item, index) => {
                     const linha = document.createElement('div');
                     linha.className = 'linha-ingrediente';
-                    linha.innerHTML = `
-                        <span>${item.nome}</span>
-                        <input type="number" step="0.01" class="input-preco" data-categoria="${categoria}" data-index="${index}" value="${item.preco.toFixed(2)}">
-                    `;
+                    linha.innerHTML = `<span>${item.nome}</span><input type="number" step="0.01" class="input-preco" data-tipo="produto" data-index="${index}" value="${item.preco.toFixed(2)}">`;
                     divCategoria.appendChild(linha);
                 });
                 containerAdmin.appendChild(divCategoria);
             }
         }
 
-        // Evento de salvar
         document.getElementById('btnSalvar').addEventListener('click', () => {
             const inputs = document.querySelectorAll('.input-preco');
-
             inputs.forEach(input => {
-                const cat = input.dataset.categoria;
-                const index = input.dataset.index;
                 const novoPreco = parseFloat(input.value) || 0;
-                dadosAtuais[cat][index].preco = novoPreco;
+                if (input.dataset.tipo === 'ingrediente') {
+                    const cat = input.dataset.categoria;
+                    const index = input.dataset.index;
+                    dadosIngredientes[cat][index].preco = novoPreco;
+                    localStorage.setItem('chamaBurguer_precos', JSON.stringify(dadosIngredientes));
+                } else {
+                    const index = input.dataset.index;
+                    dadosProdutos[index].preco = novoPreco;
+                    localStorage.setItem('chamaBurguer_produtos', JSON.stringify(dadosProdutos));
+                }
             });
-
-            localStorage.setItem('chamaBurguer_precos', JSON.stringify(dadosAtuais));
-
-            // Mostra o Toast
             const toast = document.getElementById('toast');
             toast.classList.add('ativo');
             setTimeout(() => toast.classList.remove('ativo'), 3000);
         });
 
-        // Evento de resetar
-        document.getElementById('btnResetar').addEventListener('click', () => {
-            if (confirm("Tem certeza que deseja restaurar os preços originais?")) {
-                localStorage.removeItem('chamaBurguer_precos');
-                dadosAtuais = JSON.parse(JSON.stringify(ingredientesOriginais));
-                renderizarAdmin();
-                alert("Preços restaurados!");
-            }
+        document.getElementById('btnTabIngredientes').addEventListener('click', () => {
+            abaAtual = 'ingredientes';
+            document.getElementById('btnTabIngredientes').classList.add('ativo');
+            document.getElementById('btnTabProdutos').classList.remove('ativo');
+            renderizarAdmin();
         });
 
-        // Inicializa
+        document.getElementById('btnTabProdutos').addEventListener('click', () => {
+            abaAtual = 'produtos';
+            document.getElementById('btnTabProdutos').classList.add('ativo');
+            document.getElementById('btnTabIngredientes').classList.remove('ativo');
+            renderizarAdmin();
+        });
+
         renderizarAdmin();
     </script>
 </body>
