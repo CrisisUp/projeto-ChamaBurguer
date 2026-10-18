@@ -280,19 +280,27 @@
 
         document.getElementById('btnSalvar').addEventListener('click', () => {
             const inputs = document.querySelectorAll('.input-preco');
+
             inputs.forEach(input => {
+                const tipo = input.dataset.tipo;
                 const novoPreco = parseFloat(input.value) || 0;
-                if (input.dataset.tipo === 'ingrediente') {
+
+                if (tipo === 'ingrediente') {
                     const cat = input.dataset.categoria;
                     const index = input.dataset.index;
                     dadosIngredientes[cat][index].preco = novoPreco;
-                    localStorage.setItem('chamaBurguer_precos', JSON.stringify(dadosIngredientes));
-                } else {
+                    // Atualiza os dados na memória
+                    dadosIngredientes[cat][index].preco = novoPreco;
+                } else if (tipo === 'produto') {
                     const index = input.dataset.index;
                     dadosProdutos[index].preco = novoPreco;
-                    localStorage.setItem('chamaBurguer_produtos', JSON.stringify(dadosProdutos));
                 }
             });
+
+            // 👇 SALVA AMBOS OS DADOS FORA DO LOOP
+            localStorage.setItem('chamaBurguer_precos', JSON.stringify(dadosIngredientes));
+            localStorage.setItem('chamaBurguer_produtos', JSON.stringify(dadosProdutos));
+
             const toast = document.getElementById('toast');
             toast.classList.add('ativo');
             setTimeout(() => toast.classList.remove('ativo'), 3000);
