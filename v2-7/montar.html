@@ -177,6 +177,23 @@
             color: var(--texto-muted);
         }
 
+        /* Imagem do Ingrediente dentro do Card */
+        .img-ingrediente {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid var(--creme-escuro);
+            background-color: var(--creme);
+        }
+
+        .card-ingrediente.selecionado .img-ingrediente {
+            border-color: var(--laranja);
+            transform: scale(1.05);
+            transition: 0.2s;
+        }
+
         /* Painel Resumo (Sidebar) */
         .painel-resumo {
             background: var(--bg-card);
@@ -344,13 +361,40 @@
         // 1. BANCO DE DADOS (Com fallback para o Admin)
         // ============================================
         const ingredientesOriginais = {
-            paes: [{ id: 'brioche', nome: 'Pão Brioche', preco: 5.00 }, { id: 'australiano', nome: 'Pão Australiano', preco: 6.50 }],
-            carnes: [{ id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00 }, { id: 'frango', nome: 'Frango Grelhado', preco: 12.00 }, { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00 }],
-            molhos: [{ id: 'maionese', nome: 'Maionese da Casa', preco: 2.00 }, { id: 'barbecue', nome: 'Barbecue', preco: 2.50 }, { id: 'picante', nome: 'Picante', preco: 2.50 }],
-            queijos: [{ id: 'cheddar', nome: 'Cheddar', preco: 3.50 }, { id: 'prato', nome: 'Prato', preco: 3.00 }],
-            vegetais: [{ id: 'alface', nome: 'Alface', preco: 1.00 }, { id: 'tomate', nome: 'Tomate', preco: 1.50 }, { id: 'picles', nome: 'Picles', preco: 2.00 }, { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50 }],
-            bebidas: [{ id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00 }, { id: 'suco', nome: 'Suco de Laranja', preco: 8.00 }, { id: 'agua', nome: 'Água Mineral', preco: 4.00 }],
-            adicionais: [{ id: 'bacon', nome: 'Bacon', preco: 5.00 }, { id: 'ovo', nome: 'Ovo Frito', preco: 2.50 }, { id: 'onion', nome: 'Onion Rings', preco: 4.00 }]
+            paes: [
+                { id: 'brioche', nome: 'Pão Brioche', preco: 5.00, img: 'assets/images/pao-brioche.jpg' },
+                { id: 'australiano', nome: 'Pão Australiano', preco: 6.50, img: 'assets/images/pao-australiano.jpg' }
+            ],
+            carnes: [
+                { id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00, img: 'assets/images/carne-bovina.jpg' },
+                { id: 'frango', nome: 'Frango Grelhado', preco: 12.00, img: 'assets/images/frango.jpg' },
+                { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00, img: 'assets/images/burger-veggie.jpg' }
+            ],
+            molhos: [
+                { id: 'maionese', nome: 'Maionese da Casa', preco: 2.00, img: 'assets/images/maionese.jpg' },
+                { id: 'barbecue', nome: 'Barbecue', preco: 2.50, img: 'assets/images/barbecue.jpg' },
+                { id: 'picante', nome: 'Picante', preco: 2.50, img: 'assets/images/picante.jpg' }
+            ],
+            queijos: [
+                { id: 'cheddar', nome: 'Cheddar', preco: 3.50, img: 'assets/images/cheddar.jpg' },
+                { id: 'prato', nome: 'Prato', preco: 3.00, img: 'assets/images/prato.jpg' }
+            ],
+            vegetais: [
+                { id: 'alface', nome: 'Alface', preco: 1.00, img: 'assets/images/alface.jpg' },
+                { id: 'tomate', nome: 'Tomate', preco: 1.50, img: 'assets/images/tomate.jpg' },
+                { id: 'picles', nome: 'Picles', preco: 2.00, img: 'assets/images/picles.jpg' },
+                { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50, img: 'assets/images/cebola.jpg' }
+            ],
+            bebidas: [
+                { id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00, img: 'assets/images/bebida.jpg' },
+                { id: 'suco', nome: 'Suco de Laranja', preco: 8.00, img: 'assets/images/suco.jpg' },
+                { id: 'agua', nome: 'Água Mineral', preco: 4.00, img: 'assets/images/agua.jpg' }
+            ],
+            adicionais: [
+                { id: 'bacon', nome: 'Bacon', preco: 5.00, img: 'assets/images/burger-bacon.jpg' },
+                { id: 'ovo', nome: 'Ovo Frito', preco: 2.50, img: 'assets/images/ovo.jpg' },
+                { id: 'onion', nome: 'Onion Rings', preco: 4.00, img: 'assets/images/onion.jpg' }
+            ]
         };
 
         // Tenta puxar os preços alterados pelo Admin. Se não existirem, usa os originais.
@@ -382,6 +426,7 @@
                 label.innerHTML = `
                     <input type="${tipoInput}" name="${categoria}" value="${item.id}" data-preco="${item.preco}" data-nome="${item.nome}">
                     <div class="custom-check"></div>
+                    <img src="${item.img}" alt="${item.nome}" class="img-ingrediente" onerror="this.style.display='none'">
                     <div class="info-ingrediente">
                         <span class="nome">${item.nome}</span>
                         <span class="preco">+ ${formatarMoeda(item.preco)}</span>

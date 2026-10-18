@@ -1270,6 +1270,11 @@
         <section class="cardapio" id="cardapio">
             <h2>Nosso cardápio</h2>
 
+            <div style="max-width: 500px; margin: 0 auto 24px auto;">
+                <input type="text" id="campoBusca" placeholder="🔍 Buscar lanche..."
+                    style="width: 100%; padding: 14px 20px; border-radius: 50px; border: 2px solid var(--creme-escuro); font-size: 1rem; outline: none; transition: 0.3s;">
+            </div>
+
             <!-- NOVO BOTÃO DE MONTAGEM -->
             <div style="text-align: center; margin-bottom: 24px;">
                 <a href="montar.html" class="botao botao-primario"
@@ -1834,6 +1839,24 @@
                 }
             });
         });
+
+        // ============================================
+        // 11. BUSCA NO CARDÁPIO
+        // ============================================
+        const campoBusca = document.getElementById('campoBusca');
+        if (campoBusca) {
+            campoBusca.addEventListener('input', (e) => {
+                const termo = e.target.value.toLowerCase();
+                document.querySelectorAll('.cardapio-item').forEach(item => {
+                    const nome = item.querySelector('h3').textContent.toLowerCase();
+                    if (nome.includes(termo)) {
+                        item.classList.remove('escondido');
+                    } else {
+                        item.classList.add('escondido');
+                    }
+                });
+            });
+        }
     </script>
 </body>
 
