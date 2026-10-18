@@ -1,3 +1,6 @@
+// Importa as funções puras do arquivo utils.js
+import { formatarMoeda, formatarTelefone } from "./utils.js";
+
 // ============================================
 // 0. DARK MODE (TEMA ESCURO)
 // ============================================
@@ -69,24 +72,12 @@ function mostrarToast(mensagem, icone = "🍔", tipo = "sucesso") {
 }
 
 // ============================================
-// 3. MÁSCARA DE TELEFONE
+// 3. MÁSCARA DE TELEFONE (Usa a função do utils.js)
 // ============================================
 const inputTelefone = document.getElementById("telefone");
 if (inputTelefone) {
   inputTelefone.addEventListener("input", (e) => {
-    let valor = e.target.value.replace(/\D/g, "");
-    if (valor.length > 11) valor = valor.slice(0, 11);
-
-    if (valor.length > 10) {
-      valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
-    } else if (valor.length > 6) {
-      valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
-    } else if (valor.length > 2) {
-      valor = valor.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
-    } else if (valor.length > 0) {
-      valor = valor.replace(/^(\d*)/, "($1");
-    }
-    e.target.value = valor;
+    e.target.value = formatarTelefone(e.target.value);
   });
 }
 
@@ -135,10 +126,6 @@ const carrinhoTexto = document.getElementById("carrinhoTexto");
 const carrinhoItensContainer = document.getElementById("carrinhoItens");
 const carrinhoTotalValor = document.getElementById("carrinhoTotalValor");
 const btnFinalizar = document.getElementById("btnFinalizar");
-
-function formatarMoeda(valor) {
-  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
 
 function atualizarInterfaceCarrinho() {
   let totalItens = 0;
