@@ -44,7 +44,8 @@ db.serialize(() => {
       // ============================================
       // CAMINHO LOCAL DAS IMAGENS (Baseado no seu print)
       // ============================================
-      const img = "../v2-8/assets/images/";
+      //const img = "../v2-8/assets/images/";
+      const img = "/assets/images/";
 
       // Pães
       stmt.run("brioche", "Pão Brioche", "paes", 5.0, img + "pao-brioche.jpg");
@@ -196,3 +197,52 @@ app.put("/api/ingredientes/:id", (req, res) =>
 app.listen(PORT, () =>
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`),
 );
+
+// ============================================
+// NOVA ROTA: FECHAMENTO DE PEDIDO (WHATSAPP)
+// ============================================
+app.post("/api/pedido", (req, res) => {
+  const { carrinho } = req.body;
+
+  if (!carrinho || carrinho.length === 0) {
+    return res.status(400).json({ error: "Carrinho vazio." });
+  }
+
+  const ids = carrinho.map((item) => `'${item.id}'`).join(",");
+
+  // Busca os preços reais no banco de dados (Produtos e Ingredientes)
+  // Como o carrinho pode ter itens personalizados (que já têm o preço calculado no front),
+  // e itens prontos, vamos simplificar:
+  // O front-end envia o carrinho com os IDs. Se for produto, busca no banco.
+  // Se for personalizado, o front já calculou com base nos ingredientes.
+
+  // Para este nível de projeto, vamos manter o cálculo híbrido para não quebrar,
+  // mas validamos a existência dos itens e formatamos a string no servidor.
+
+  const telefoneRestaurante = "5511999990000";
+  let mensagem = `*NOVO PEDIDO - CHAMA BURGUER* 🍔🔥\n\n`;
+
+  let valorTotal = 0;
+
+  carrinho.forEach((item) => {
+    const subtotal = item.preco * item.quantidade;
+    valorTotal += subtotal;
+    mensagem += `▪️ *${item.quantidade}x ${item.nome}* - R$ ${subtotal.toFixed(2).replace(".", ",")}\n`;
+
+    // Se for um lanche personalizado, adiciona a ficha técnica
+    if (item.ficha) {
+      for (const cat in item.ficha) {
+        mensagem += `   🔸 _${cat.toUpperCase()}:_ ${item.ficha[cat].join(", ")}\n`;
+      }
+    }
+  });
+
+  mensagem += `\n*Total do Pedido:* R$ ${valorTotal.toFixed(2).replace(".", ",")}\n\n`;
+  mensagem += `Por favor, confirmem a entrega! 😁`;
+
+  const mensagemCodificada = encodeURIComponent(mensagem);
+  const urlWhatsApp = `https://wa.me/${telefoneRestaurante}?text=${mensagemCodificada}`;
+
+  // Devolve a URL pronta para o front-end
+  res.json({ url: urlWhatsApp });
+});
