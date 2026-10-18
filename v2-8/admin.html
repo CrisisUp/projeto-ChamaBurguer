@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Preços | Chama Burguer</title>
+    <title>Painel do Restaurante | Chama Burguer</title>
     <style>
         :root {
             --bg: #121212;
@@ -189,9 +189,7 @@
             opacity: 1;
         }
 
-        /* ============================================
-           ESTILOS DA TABELA DE RESERVAS
-           ============================================ */
+        /* Tabela de Reservas */
         .tabela-reservas {
             width: 100%;
             border-collapse: collapse;
@@ -235,12 +233,11 @@
             font-style: italic;
         }
 
-        /* Botão de Cancelar Reserva (NOVO) */
+        /* Botão de Cancelar */
         .btn-cancelar {
             background: transparent;
             border: 1px solid transparent;
             color: var(--vermelho);
-            /* Ícone vermelho */
             cursor: pointer;
             padding: 6px;
             border-radius: 6px;
@@ -252,17 +249,9 @@
 
         .btn-cancelar:hover {
             background: rgba(225, 29, 72, 0.15);
-            /* Fundo vermelho bem clarinho */
             border-color: rgba(225, 29, 72, 0.3);
             color: #ff4d6d;
-            /* Vermelho mais vivo */
             transform: scale(1.1);
-            /* Efeito de zoom */
-        }
-
-        .btn-cancelar:active {
-            transform: scale(0.95);
-            /* Efeito de clique */
         }
     </style>
 </head>
@@ -284,12 +273,11 @@
         </div>
     </main>
 
-    <!-- O botão Salvar só aparece nas abas de preços -->
     <div class="acoes-admin" id="acoesSalvar">
         <button type="button" class="btn-salvar" id="btnSalvar">Salvar Alterações</button>
     </div>
 
-    <div class="toast" id="toast">✅ Preços salvos com sucesso!</div>
+    <div class="toast" id="toast">✅ Alterações salvas com sucesso!</div>
 
     <script>
         // PROTEÇÃO DE ACESSO
@@ -298,7 +286,7 @@
         }
 
         // ============================================
-        // ESTADO GLOBAL E VARIÁVEIS
+        // ESTADO GLOBAL
         // ============================================
         const containerAdmin = document.getElementById('containerAdmin');
         const acoesSalvar = document.getElementById('acoesSalvar');
@@ -307,47 +295,38 @@
         let dadosIngredientes = {};
         let dadosProdutos = [];
 
-        const ingredientesOriginais = {
-            paes: [{ id: 'brioche', nome: 'Pão Brioche', preco: 5.00, img: 'assets/images/pao-brioche.jpg' }, { id: 'australiano', nome: 'Pão Australiano', preco: 6.50, img: 'assets/images/pao-australiano.jpg' }],
-            carnes: [{ id: 'carne-160', nome: 'Carne Bovina 160g', preco: 14.00, img: 'assets/images/carne-bovina.jpg' }, { id: 'frango', nome: 'Frango Grelhado', preco: 12.00, img: 'assets/images/frango.jpg' }, { id: 'veggie', nome: 'Grão-de-bico', preco: 13.00, img: 'assets/images/burger-veggie.jpg' }],
-            molhos: [{ id: 'maionese', nome: 'Maionese da Casa', preco: 2.00, img: 'assets/images/maionese.jpg' }, { id: 'barbecue', nome: 'Barbecue', preco: 2.50, img: 'assets/images/barbecue.jpg' }, { id: 'picante', nome: 'Picante', preco: 2.50, img: 'assets/images/picante.jpg' }],
-            queijos: [{ id: 'cheddar', nome: 'Cheddar', preco: 3.50, img: 'assets/images/cheddar.jpg' }, { id: 'prato', nome: 'Prato', preco: 3.00, img: 'assets/images/prato.jpg' }],
-            vegetais: [{ id: 'alface', nome: 'Alface', preco: 1.00, img: 'assets/images/alface.jpg' }, { id: 'tomate', nome: 'Tomate', preco: 1.50, img: 'assets/images/tomate.jpg' }, { id: 'picles', nome: 'Picles', preco: 2.00, img: 'assets/images/picles.jpg' }, { id: 'cebola', nome: 'Cebola Roxa', preco: 1.50, img: 'assets/images/cebola.jpg' }],
-            bebidas: [{ id: 'coca', nome: 'Coca-Cola Lata', preco: 6.00, img: 'assets/images/bebida.jpg' }, { id: 'suco', nome: 'Suco de Laranja', preco: 8.00, img: 'assets/images/suco.jpg' }, { id: 'agua', nome: 'Água Mineral', preco: 4.00, img: 'assets/images/agua.jpg' }],
-            adicionais: [{ id: 'bacon', nome: 'Bacon', preco: 5.00, img: 'assets/images/burger-bacon.jpg' }, { id: 'ovo', nome: 'Ovo Frito', preco: 2.50, img: 'assets/images/ovo.jpg' }, { id: 'onion', nome: 'Onion Rings', preco: 4.00, img: 'assets/images/onion.jpg' }]
-        };
-
         // ============================================
-        // BUSCA DE DADOS (API DO NODE.JS)
+        // BUSCA DE DADOS (API NODE.JS)
         // ============================================
         async function carregarDadosDoServidor() {
-            try {
-                const resposta = await fetch('http://localhost:3001/api/produtos');
-                if (resposta.ok) dadosProdutos = await resposta.json();
-            } catch (erro) {
-                console.warn("Servidor offline. Usando dados locais para os produtos.");
-                dadosProdutos = [
-                    { id: 'classico', nome: 'Clássico', preco: 24.90 },
-                    { id: 'bacon', nome: 'Bacon', preco: 28.90 },
-                    { id: 'veggie', nome: 'Veggie', preco: 26.90 },
-                    { id: 'combo', nome: 'Combo Fritas + Refri', preco: 12.90 }
-                ];
-            }
+            containerAdmin.innerHTML = '<p style="text-align: center; color: var(--muted);">Conectando ao servidor...</p>';
 
-            const dadosSalvos = JSON.parse(localStorage.getItem('chamaBurguer_precos'));
-            dadosIngredientes = JSON.parse(JSON.stringify(ingredientesOriginais));
-            if (dadosSalvos) {
-                for (const categoria in dadosSalvos) {
-                    if (dadosIngredientes[categoria]) {
-                        dadosSalvos[categoria].forEach((itemSalvo, index) => {
-                            if (dadosIngredientes[categoria][index]) {
-                                dadosIngredientes[categoria][index].preco = itemSalvo.preco;
-                            }
-                        });
-                    }
+            try {
+                // 1. Busca Lanches Prontos
+                const resProdutos = await fetch('http://localhost:3001/api/produtos');
+                if (resProdutos.ok) dadosProdutos = await resProdutos.json();
+
+                // 2. Busca Ingredientes e Agrupa por Categoria
+                const resIngredientes = await fetch('http://localhost:3001/api/ingredientes');
+                if (resIngredientes.ok) {
+                    const listaPlana = await resIngredientes.json();
+
+                    // Limpa o objeto antes de agrupar
+                    dadosIngredientes = {};
+
+                    listaPlana.forEach(item => {
+                        if (!dadosIngredientes[item.categoria]) {
+                            dadosIngredientes[item.categoria] = [];
+                        }
+                        dadosIngredientes[item.categoria].push(item);
+                    });
                 }
+
+                renderizarAdmin();
+            } catch (erro) {
+                console.error("Erro ao conectar com o Backend:", erro);
+                containerAdmin.innerHTML = '<p class="sem-reservas" style="color: var(--vermelho);">Servidor Node.js offline. Ligue o terminal (`node server.js`) e recarregue.</p>';
             }
-            renderizarAdmin();
         }
 
         // ============================================
@@ -355,8 +334,6 @@
         // ============================================
         function renderizarAdmin() {
             containerAdmin.innerHTML = '';
-
-            // Controla a visibilidade do botão Salvar
             acoesSalvar.style.display = abaAtual === 'reservas' ? 'none' : 'flex';
 
             if (abaAtual === 'ingredientes') {
@@ -364,10 +341,18 @@
                     const divCategoria = document.createElement('div');
                     divCategoria.className = 'categoria-admin';
                     divCategoria.innerHTML = `<h2>${categoria}</h2>`;
+
                     dadosIngredientes[categoria].forEach((item, index) => {
                         const linha = document.createElement('div');
                         linha.className = 'linha-ingrediente';
-                        linha.innerHTML = `<span>${item.nome}</span><input type="number" step="0.01" class="input-preco" data-tipo="ingrediente" data-categoria="${categoria}" data-index="${index}" value="${item.preco.toFixed(2)}">`;
+                        // Adicionado data-id e data-tipo para o backend identificar
+                        linha.innerHTML = `
+                            <span>${item.nome}</span>
+                            <input type="number" step="0.01" class="input-preco" 
+                                   data-tipo="ingrediente" 
+                                   data-id="${item.id}" 
+                                   value="${item.preco.toFixed(2)}">
+                        `;
                         divCategoria.appendChild(linha);
                     });
                     containerAdmin.appendChild(divCategoria);
@@ -376,10 +361,17 @@
                 const divCategoria = document.createElement('div');
                 divCategoria.className = 'categoria-admin';
                 divCategoria.innerHTML = `<h2>Lanches Prontos</h2>`;
+
                 dadosProdutos.forEach((item, index) => {
                     const linha = document.createElement('div');
                     linha.className = 'linha-ingrediente';
-                    linha.innerHTML = `<span>${item.nome}</span><input type="number" step="0.01" class="input-preco" data-tipo="produto" data-index="${index}" data-id="${item.id}" value="${item.preco.toFixed(2)}">`;
+                    linha.innerHTML = `
+                        <span>${item.nome}</span>
+                        <input type="number" step="0.01" class="input-preco" 
+                               data-tipo="produto" 
+                               data-id="${item.id}" 
+                               value="${item.preco.toFixed(2)}">
+                    `;
                     divCategoria.appendChild(linha);
                 });
                 containerAdmin.appendChild(divCategoria);
@@ -389,11 +381,10 @@
         }
 
         // ============================================
-        // ABA DE RESERVAS (NOVO)
+        // ABA DE RESERVAS
         // ============================================
         async function carregarReservas() {
             containerAdmin.innerHTML = '<p style="text-align: center; color: var(--muted);">Buscando reservas...</p>';
-
             try {
                 const resposta = await fetch('http://localhost:3001/api/reservas');
                 const reservas = await resposta.json();
@@ -407,20 +398,12 @@
                 tabela.className = 'tabela-reservas';
                 tabela.innerHTML = `
                     <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Telefone</th>
-                            <th>Data</th>
-                            <th>Pessoas</th>
-                            <th>Status</th>
-                            <th>Ações</th> <!-- NOVA COLUNA -->
-                        </tr>
+                        <tr><th>Nome</th><th>Telefone</th><th>Data</th><th>Pessoas</th><th>Status</th><th>Ações</th></tr>
                     </thead>
                     <tbody>
                         ${reservas.map(r => {
                     const partesData = r.data.split('-');
                     const dataBR = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
-
                     return `
                             <tr>
                                 <td><strong>${r.nome}</strong></td>
@@ -429,106 +412,76 @@
                                 <td>${r.pessoas} pessoa(s)</td>
                                 <td><span class="status-badge">Confirmada</span></td>
                                 <td>
-                                    <!-- NOVO BOTÃO DE APAGAR (SVG) -->
-    <button class="btn-cancelar" onclick="cancelarReserva(${r.id})" title="Cancelar reserva">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            <line x1="10" y1="11" x2="10" y2="17"></line>
-            <line x1="14" y1="11" x2="14" y2="17"></line>
-        </svg>
-    </button>
+                                    <button class="btn-cancelar" onclick="cancelarReserva(${r.id})" title="Cancelar reserva">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                    </button>
                                 </td>
-                            </tr>
-                            `;
+                            </tr>`;
                 }).join('')}
                     </tbody>
                 `;
                 containerAdmin.appendChild(tabela);
-
             } catch (erro) {
-                console.error(erro);
-                containerAdmin.innerHTML = '<p class="sem-reservas" style="color: var(--vermelho);">Erro: O servidor Node.js parece estar desligado.</p>';
+                containerAdmin.innerHTML = '<p class="sem-reservas" style="color: var(--vermelho);">Servidor offline.</p>';
             }
         }
 
-        // ============================================
-        // FUNÇÃO PARA CANCELAR RESERVA (NOVO)
-        // ============================================
         async function cancelarReserva(id) {
-            // Pergunta ao admin se ele tem certeza
-            if (!confirm("Tem certeza que deseja cancelar esta reserva? Essa ação não pode ser desfeita.")) {
-                return;
-            }
-
+            if (!confirm("Tem certeza que deseja cancelar esta reserva?")) return;
             try {
-                const resposta = await fetch(`http://localhost:3001/api/reservas/${id}`, {
-                    method: 'DELETE'
-                });
-
+                const resposta = await fetch(`http://localhost:3001/api/reservas/${id}`, { method: 'DELETE' });
                 if (resposta.ok) {
-                    // Se apagou com sucesso no servidor, recarrega a tabela na tela
                     carregarReservas();
-
-                    // Mostra o toast (usando aquele toast verde que já existe no admin)
                     const toast = document.getElementById('toast');
-                    toast.textContent = "🗑️ Reserva cancelada com sucesso!";
-                    toast.style.backgroundColor = "var(--vermelho)"; // Muda a cor para vermelho
+                    toast.textContent = "🗑️ Reserva cancelada!";
+                    toast.style.backgroundColor = "var(--vermelho)";
                     toast.classList.add('ativo');
-
                     setTimeout(() => {
                         toast.classList.remove('ativo');
-                        // Volta a cor original após 3 segundos
                         setTimeout(() => toast.style.backgroundColor = "var(--verde)", 400);
                     }, 3000);
-                } else {
-                    alert("Erro ao cancelar a reserva no servidor.");
                 }
-            } catch (erro) {
-                console.error(erro);
-                alert("Erro de conexão com o servidor.");
-            }
+            } catch (erro) { alert("Erro de conexão."); }
         }
 
         // ============================================
-        // SALVAR ALTERAÇÕES DE PREÇO
+        // SALVAR ALTERAÇÕES
         // ============================================
         document.getElementById('btnSalvar').addEventListener('click', async () => {
             const inputs = document.querySelectorAll('.input-preco');
-            const promessasBackend = [];
+            const promessas = [];
 
             inputs.forEach(input => {
                 const tipo = input.dataset.tipo;
+                const id = input.dataset.id;
                 const novoPreco = parseFloat(input.value) || 0;
 
                 if (tipo === 'ingrediente') {
-                    const cat = input.dataset.categoria;
-                    const index = input.dataset.index;
-                    dadosIngredientes[cat][index].preco = novoPreco;
+                    promessas.push(fetch(`http://localhost:3001/api/ingredientes/${id}`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ preco: novoPreco })
+                    }));
                 } else if (tipo === 'produto') {
-                    const idProduto = input.dataset.id;
-                    const index = input.dataset.index;
-                    dadosProdutos[index].preco = novoPreco;
-
-                    promessasBackend.push(
-                        fetch(`http://localhost:3001/api/produtos/${idProduto}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ preco: novoPreco })
-                        })
-                    );
+                    promessas.push(fetch(`http://localhost:3001/api/produtos/${id}`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ preco: novoPreco })
+                    }));
                 }
             });
 
-            localStorage.setItem('chamaBurguer_precos', JSON.stringify(dadosIngredientes));
-
             try {
-                await Promise.all(promessasBackend);
+                await Promise.all(promessas);
                 const toast = document.getElementById('toast');
+                toast.textContent = "✅ Preços salvos!";
                 toast.classList.add('ativo');
                 setTimeout(() => toast.classList.remove('ativo'), 3000);
             } catch (erro) {
-                alert("Erro ao conectar com o servidor. Alterações não salvas.");
+                alert("Erro ao conectar com o servidor.");
             }
         });
 
@@ -545,17 +498,9 @@
             btnTabReservas.classList.remove('ativo');
         }
 
-        btnTabIngredientes.addEventListener('click', () => {
-            abaAtual = 'ingredientes'; resetarAbas(); btnTabIngredientes.classList.add('ativo'); renderizarAdmin();
-        });
-
-        btnTabProdutos.addEventListener('click', () => {
-            abaAtual = 'produtos'; resetarAbas(); btnTabProdutos.classList.add('ativo'); renderizarAdmin();
-        });
-
-        btnTabReservas.addEventListener('click', () => {
-            abaAtual = 'reservas'; resetarAbas(); btnTabReservas.classList.add('ativo'); renderizarAdmin();
-        });
+        btnTabIngredientes.addEventListener('click', () => { abaAtual = 'ingredientes'; resetarAbas(); btnTabIngredientes.classList.add('ativo'); renderizarAdmin(); });
+        btnTabProdutos.addEventListener('click', () => { abaAtual = 'produtos'; resetarAbas(); btnTabProdutos.classList.add('ativo'); renderizarAdmin(); });
+        btnTabReservas.addEventListener('click', () => { abaAtual = 'reservas'; resetarAbas(); btnTabReservas.classList.add('ativo'); renderizarAdmin(); });
 
         // ============================================
         // INICIALIZAÇÃO

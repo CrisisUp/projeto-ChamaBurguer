@@ -8,34 +8,22 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// ============================================
-// CONFIGURAÇÃO DO BANCO DE DADOS SQLITE
-// ============================================
 const db = new sqlite3.Database("./database.sqlite", (err) => {
   if (err) console.error("Erro ao abrir o banco:", err.message);
   else console.log("📦 Conectado ao banco de dados SQLite.");
 });
 
-// Cria as tabelas se não existirem
 db.serialize(() => {
-  // Tabela de Produtos (Lanches Prontos)
-  db.run(`CREATE TABLE IF NOT EXISTS produtos (
-        id TEXT PRIMARY KEY,
-        nome TEXT,
-        preco REAL
-    )`);
+  db.run(
+    `CREATE TABLE IF NOT EXISTS produtos (id TEXT PRIMARY KEY, nome TEXT, preco REAL)`,
+  );
+  db.run(
+    `CREATE TABLE IF NOT EXISTS reservas (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, telefone TEXT, data TEXT, pessoas INTEGER, criado_em DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+  );
+  db.run(
+    `CREATE TABLE IF NOT EXISTS ingredientes (id TEXT PRIMARY KEY, nome TEXT, categoria TEXT, preco REAL, imagem TEXT)`,
+  );
 
-  // Tabela de Reservas
-  db.run(`CREATE TABLE IF NOT EXISTS reservas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        telefone TEXT,
-        data TEXT,
-        pessoas INTEGER,
-        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
-
-  // Insere os produtos iniciais se a tabela estiver vazia
   db.get("SELECT COUNT(*) as count FROM produtos", (err, row) => {
     if (row.count === 0) {
       const stmt = db.prepare("INSERT INTO produtos VALUES (?, ?, ?)");
@@ -44,76 +32,167 @@ db.serialize(() => {
       stmt.run("veggie", "Veggie", 26.9);
       stmt.run("combo", "Combo Fritas + Refri", 12.9);
       stmt.finalize();
-      console.log("🌱 Preços iniciais inseridos no banco.");
+    }
+  });
+
+  db.get("SELECT COUNT(*) as count FROM ingredientes", (err, row) => {
+    if (row.count === 0) {
+      const stmt = db.prepare(
+        "INSERT INTO ingredientes VALUES (?, ?, ?, ?, ?)",
+      );
+
+      // ============================================
+      // CAMINHO LOCAL DAS IMAGENS (Baseado no seu print)
+      // ============================================
+      const img = "../v2-8/assets/images/";
+
+      // Pães
+      stmt.run("brioche", "Pão Brioche", "paes", 5.0, img + "pao-brioche.jpg");
+      stmt.run(
+        "australiano",
+        "Pão Australiano",
+        "paes",
+        6.5,
+        img + "pao-australiano.jpg",
+      );
+
+      // Carnes
+      stmt.run(
+        "carne-160",
+        "Carne Bovina 160g",
+        "carnes",
+        14.0,
+        img + "carne-bovina.jpg",
+      );
+      stmt.run(
+        "frango",
+        "Frango Grelhado",
+        "carnes",
+        12.0,
+        img + "frango-grelhado.jpeg",
+      );
+      stmt.run(
+        "veggie",
+        "Grão-de-bico",
+        "carnes",
+        13.0,
+        img + "hamburguer-grao-de-bico.jpeg",
+      );
+
+      // Molhos
+      stmt.run(
+        "maionese",
+        "Maionese da Casa",
+        "molhos",
+        2.0,
+        img + "maionese.jpeg",
+      );
+      stmt.run(
+        "barbecue",
+        "Barbecue",
+        "molhos",
+        2.5,
+        img + "molho-barbecue.jpeg",
+      );
+      stmt.run("picante", "Picante", "molhos", 2.5, img + "molho-picante.jpeg");
+
+      // Queijos
+      stmt.run(
+        "cheddar",
+        "Cheddar",
+        "queijos",
+        3.5,
+        img + "queijo-cheddar.jpeg",
+      );
+      stmt.run("prato", "Prato", "queijos", 3.0, img + "queijo-prato.jpeg");
+
+      // Vegetais
+      stmt.run("alface", "Alface", "vegetais", 1.0, img + "alface.jpeg");
+      stmt.run("tomate", "Tomate", "vegetais", 1.5, img + "tomate.jpeg");
+      stmt.run("picles", "Picles", "vegetais", 2.0, img + "picles.jpeg");
+      stmt.run(
+        "cebola",
+        "Cebola Roxa",
+        "vegetais",
+        1.5,
+        img + "cebola-roxa.jpeg",
+      );
+
+      // Bebidas
+      stmt.run("coca", "Coca-Cola Lata", "bebidas", 6.0, img + "bebida.jpg");
+      stmt.run(
+        "suco",
+        "Suco de Laranja",
+        "bebidas",
+        8.0,
+        img + "suco-laranja.jpeg",
+      );
+      stmt.run(
+        "agua",
+        "Água Mineral",
+        "bebidas",
+        4.0,
+        img + "agua-mineral.jpeg",
+      );
+
+      // Adicionais
+      stmt.run("bacon", "Bacon", "adicionais", 5.0, img + "bacon-frito.jpeg");
+      stmt.run("ovo", "Ovo Frito", "adicionais", 2.5, img + "ovo-frito.jpeg");
+      stmt.run(
+        "onion",
+        "Onion Rings",
+        "adicionais",
+        4.0,
+        img + "onions-ring.jpeg",
+      );
+
+      stmt.finalize();
+      console.log("🌱 Ingredientes inseridos com as imagens locais corretas.");
     }
   });
 });
 
-// ============================================
-// ROTAS DA API (ENDPOINTS)
-// ============================================
-
-// 1. Buscar todos os produtos (usado pelo index.html)
-app.get("/api/produtos", (req, res) => {
-  db.all("SELECT * FROM produtos", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
-
-// 2. Atualizar o preço de um produto (usado pelo admin.html)
-app.put("/api/produtos/:id", (req, res) => {
-  const { preco } = req.body;
-  const { id } = req.params;
-
+app.get("/api/produtos", (req, res) =>
+  db.all("SELECT * FROM produtos", [], (err, rows) => res.json(rows)),
+);
+app.put("/api/produtos/:id", (req, res) =>
   db.run(
     "UPDATE produtos SET preco = ? WHERE id = ?",
-    [preco, id],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: "Preço atualizado com sucesso!" });
-    },
-  );
-});
-
-// 3. Criar uma nova reserva (usado pelo index.html)
+    [req.body.preco, req.params.id],
+    () => res.json({ ok: true }),
+  ),
+);
 app.post("/api/reservas", (req, res) => {
   const { nome, telefone, data, pessoas } = req.body;
-
   db.run(
     "INSERT INTO reservas (nome, telefone, data, pessoas) VALUES (?, ?, ?, ?)",
     [nome, telefone, data, pessoas],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res
-        .status(201)
-        .json({ message: "Reserva salva no banco!", id: this.lastID });
+    function () {
+      res.json({ id: this.lastID });
     },
   );
 });
+app.get("/api/reservas", (req, res) =>
+  db.all("SELECT * FROM reservas ORDER BY criado_em DESC", [], (err, rows) =>
+    res.json(rows),
+  ),
+);
+app.delete("/api/reservas/:id", (req, res) =>
+  db.run("DELETE FROM reservas WHERE id = ?", req.params.id, () =>
+    res.json({ ok: true }),
+  ),
+);
+app.get("/api/ingredientes", (req, res) =>
+  db.all("SELECT * FROM ingredientes", [], (err, rows) => res.json(rows)),
+);
+app.put("/api/ingredientes/:id", (req, res) =>
+  db.run(
+    "UPDATE ingredientes SET preco = ? WHERE id = ?",
+    [req.body.preco, req.params.id],
+    () => res.json({ ok: true }),
+  ),
+);
 
-// 4. Listar todas as reservas (útil para o dono do restaurante ver)
-app.get("/api/reservas", (req, res) => {
-  db.all("SELECT * FROM reservas ORDER BY criado_em DESC", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
-
-// Inicia o servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-});
-
-// 5. Apagar uma reserva (Cancelamento)
-app.delete("/api/reservas/:id", (req, res) => {
-  const { id } = req.params;
-
-  db.run("DELETE FROM reservas WHERE id = ?", id, function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    if (this.changes === 0)
-      return res.status(404).json({ error: "Reserva não encontrada." });
-
-    res.json({ message: "Reserva cancelada com sucesso!" });
-  });
-});
+app.listen(PORT, () =>
+  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`),
+);
