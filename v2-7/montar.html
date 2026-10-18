@@ -171,7 +171,18 @@
             flex-shrink: 0;
             border: 2px solid var(--creme-escuro);
             background-color: var(--creme);
+            /* Se a imagem falhar, mostra este ícone de interrogação */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237a6a60'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z'/%3E%3C/svg%3E");
+            background-size: 24px;
+            background-position: center;
+            background-repeat: no-repeat;
             transition: 0.2s;
+        }
+
+        /* Quando a imagem carregar com sucesso, ela cobre o fundo */
+        .img-ingrediente[src] {
+            background-color: transparent;
+            background-image: none;
         }
 
         .card-ingrediente.selecionado .img-ingrediente {
@@ -391,14 +402,27 @@
                 { id: 'agua', nome: 'Água Mineral', preco: 4.00, img: 'assets/images/agua-mineral.jpeg' }
             ],
             adicionais: [
-                { id: 'bacon', nome: 'Bacon', preco: 5.00, img: 'assets/images/bacon-frito.jpeg' },
+                { id: 'bacon', nome: 'Bacon', preco: 5.00, img: 'assets/images/burger-bacon.jpg' },
                 { id: 'ovo', nome: 'Ovo Frito', preco: 2.50, img: 'assets/images/ovo-frito.jpeg' },
                 { id: 'onion', nome: 'Onion Rings', preco: 4.00, img: 'assets/images/onions-ring.jpeg' }
             ]
         };
 
-        // Tenta puxar os preços alterados pelo Admin. Se não existirem, usa os originais.
-        const ingredientes = JSON.parse(localStorage.getItem('chamaBurguer_precos')) || ingredientesOriginais;
+        // Tenta puxar os preços alterados pelo Admin
+        const dadosSalvos = JSON.parse(localStorage.getItem('chamaBurguer_precos'));
+        let ingredientes = JSON.parse(JSON.stringify(ingredientesOriginais)); // Cópia profunda para não perder imagens
+
+        if (dadosSalvos) {
+            for (const categoria in dadosSalvos) {
+                if (ingredientes[categoria]) {
+                    dadosSalvos[categoria].forEach((itemSalvo, index) => {
+                        if (ingredientes[categoria][index]) {
+                            ingredientes[categoria][index].preco = itemSalvo.preco;
+                        }
+                    });
+                }
+            }
+        }
 
         // Estado da Montagem
         let montagem = {
@@ -415,8 +439,8 @@
             return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // SVG base64 como fallback quando a imagem não existir
-        const FALLBACK_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><rect width='48' height='48' rx='24' fill='%23f0e6d3'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='20' fill='%237a6a60'>?</text></svg>";
+        // Fallback SVG corrigido (sem conflito de aspas)
+        const FALLBACK_IMG = 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="48" height="48" rx="24" fill="%23f0e6d3"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="20" fill="%237a6a60">?</text></svg>';
 
         // Renderiza os grupos com imagem
         function renderizarGrupo(categoria, containerId, tipoInput) {
@@ -426,15 +450,17 @@
             ingredientes[categoria].forEach(item => {
                 const label = document.createElement('label');
                 label.className = 'card-ingrediente';
+
+                // 👇 O HTML abaixo está limpo e sem código quebrado
                 label.innerHTML = `
-                    <input type="${tipoInput}" name="${categoria}" value="${item.id}" data-preco="${item.preco}" data-nome="${item.nome}">
-                    <div class="custom-check"></div>
-                    <img src="${item.img}" alt="${item.nome}" class="img-ingrediente" onerror="this.src='${FALLBACK_IMG}'">
-                    <div class="info-ingrediente">
-                        <span class="nome">${item.nome}</span>
-                        <span class="preco">+ ${formatarMoeda(item.preco)}</span>
-                    </div>
-                `;
+            <input type="${tipoInput}" name="${categoria}" value="${item.id}" data-preco="${item.preco}" data-nome="${item.nome}">
+            <div class="custom-check"></div>
+            <img src="${item.img}" alt="${item.nome}" class="img-ingrediente">
+            <div class="info-ingrediente">
+                <span class="nome">${item.nome}</span>
+                <span class="preco">+ ${formatarMoeda(item.preco)}</span>
+            </div>
+        `;
                 container.appendChild(label);
 
                 const input = label.querySelector('input');
